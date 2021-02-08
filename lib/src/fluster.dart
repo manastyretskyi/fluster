@@ -279,4 +279,21 @@ class Fluster<T extends Clusterable> {
   int _limitZoom(int z) {
     return math.max(minZoom, math.min(z, maxZoom + 1));
   }
+
+  /// Returns the zoom on which the cluster expands into several children
+  /// (useful for "click to zoom" feature) given the cluster's clusterId.
+  int getClusterExpansionZoom(int clusterId) {
+    var expansionZoom = (clusterId % 32) - 1;
+    while (expansionZoom <= maxZoom) {
+      final children = this.children(clusterId);
+      expansionZoom++;
+      if (children == null ||
+          children.isEmpty ||
+          children.indexWhere((element) =>
+                  element.isCluster != null && !element.isCluster!) !=
+              -1) break;
+      clusterId = children.first.clusterId!;
+    }
+    return expansionZoom;
+  }
 }
